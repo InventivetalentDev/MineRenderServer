@@ -1,0 +1,16 @@
+define({
+  "name": "MineRender-Static",
+  "version": "0.1.0",
+  "description": "MineRender static version",
+  "title": "MineRenderStatic",
+  "url": "https://static.minerender.org",
+  "sampleUrl": false,
+  "defaultVersion": "0.0.0",
+  "apidoc": "0.3.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2019-03-20T20:04:23.720Z",
+    "url": "http://apidocjs.com",
+    "version": "0.17.7"
+  }
+});
