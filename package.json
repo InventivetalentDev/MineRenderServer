@@ -14,7 +14,7 @@
     "atob": "2.1.2",
     "btoa": "1.2.1",
     "canvas": "git+https://github.com/InventivetalentDev/node-canvas.git#patch-1",
-    "express": "4.16.4",
+    "express": "4.17.1",
     "gl": "4.2.2",
     "jquery": "3.3.1",
     "minerender": "git+https://github.com/InventivetalentDev/MineRender.git",
