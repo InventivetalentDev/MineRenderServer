@@ -38,12 +38,11 @@ module.exports.getDataFromReq = function (req, res,  key, def) {
 };
 
 module.exports.makeNewRenderer = function (width, height) {
-    let context = gl(64, 64, {preserveDrawingBuffer: true});
+    let context = gl(1, 1, {preserveDrawingBuffer: true});
     let canvas = createFakeCanvas(64, 64);
     canvas.getContext = function getContext(x) {
         return context;
     };
-
 
     console.log("context: " + context);
 
@@ -95,7 +94,7 @@ module.exports.isObjectEmpty = function(obj) {
     c.getContext = function (type, attributes) {
         console.log("getContext(" + type + ")")
         if (type === "webgl") {
-            return gl(w, h, {preserveDrawingBuffer: true});
+            return gl(1, 1, {preserveDrawingBuffer: true});
         }
         return _getContext.call(this, type, attributes);
     };
