@@ -2,6 +2,7 @@ const gl = require("gl");
 const pngStream = require('three-png-stream');
 const {createCanvas, loadImage, Image, Canvas} = require("canvas");
 
+
 module.exports.getOptionsFromReq = function (req, res, def) {
     let optionHeader = req.headers["minerender-options"] || "{}";
     try {
@@ -69,6 +70,7 @@ module.exports.createFakeElement = function () {
 
 module.exports.sendRenderToRes = function (render, renderer, target, req, res) {
     res.setHeader('Content-Type', 'image/png');
+    res.setHeader("X-Minerender-Options", JSON.stringify(render.options));
     pngStream(renderer, target).pipe(res);
 };
 
