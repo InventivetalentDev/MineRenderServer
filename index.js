@@ -75,8 +75,18 @@ global.CustomEvent = function (name, data) {
 };
 
 
-app.use("/render/skin", require("./routes/render/skin")(express, config));
-app.use("/render/model", require("./routes/render/model")(express, config));
+function errorCatcher(err, req, res, next) {
+    if (res.headersSent) {
+        return next(err);
+    }
+    console.error(err.stack);
+    res.status(500);
+    res.json({msg: "Something went wrong trying to render your request!"});
+}
+
+
+app.use("/render/skin", errorCatcher, require("./routes/render/skin")(express, config));
+app.use("/render/model", errorCatcher, require("./routes/render/model")(express, config));
 
 
 server.listen(port, function () {
