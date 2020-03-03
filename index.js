@@ -16,6 +16,7 @@ const path = require("path");
 const {createCanvas, loadImage, Image, Canvas} = require("canvas");
 const gl = require("gl");
 const pngStream = require('three-png-stream');
+const {createFakeCanvas, createFakeImg} = require("./routes/helpers");
 // Stuff to trick Minerender into thinking it's in a browser
 global.Image = Image;
 global.THREE = require("three");
@@ -31,45 +32,6 @@ const http = require("http");
 const server = http.Server(app);
 const config = require("./config");
 const port = process.env.PORT || config.port || 3043;
-
-function createFakeCanvas(w, h) {
-    let c = createCanvas(w, h);
-    c.addEventListener = function (event, func, bind_) {
-    };
-    c.style = {
-        width: w,
-        height: h
-    };
-    let _getContext = c.getContext;
-    c.getContext = function (type, attributes) {
-        console.log("getContext(" + type + ")")
-        if (type === "webgl") {
-            return gl(1, 1, {preserveDrawingBuffer: true});
-        }
-        return _getContext.call(this, type, attributes);
-    };
-    return c;
-}
-
-function createFakeImg() {
-    let img = new Image();
-    img.addEventListener = function (event, func, bind_) {
-        if (event === "load") {
-            img.onload = function () {
-                func.call(img);
-            };
-        }
-        if (event === "error") {
-            img.onerror = function (err) {
-                func.call(img, err);
-            };
-        }
-    };
-    img.removeEventListener = function (event, func, bind_) {
-    };
-    return img;
-}
-
 
 global.window = {
     innerWidth: 1920,
