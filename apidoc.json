@@ -1,7 +1,7 @@
 {
-  "name": "MineRender-Static",
+  "name": "MineRender-Server",
   "version": "0.1.0",
-  "description": "MineRender static version",
-  "title": "MineRenderStatic",
+  "description": "MineRender server version",
+  "title": "MineRenderServer",
   "url" : "https://static.minerender.org"
 }

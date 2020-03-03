@@ -9,7 +9,7 @@
     "apidoc": "apidoc -i ./routes/ -o ./apidocs/"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "atob": "2.1.2",
     "btoa": "1.2.1",
