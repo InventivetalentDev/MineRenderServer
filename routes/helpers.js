@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 const gl = require("gl");
 const pngStream = require('three-png-stream');
 const {createCanvas, loadImage, Image, Canvas} = require("canvas");
@@ -7,7 +10,7 @@ module.exports.getOptionsFromReq = function (req, res, def) {
     let optionHeader = req.headers["minerender-options"] || "{}";
     try {
         optionHeader = JSON.parse(optionHeader);
-    }catch (e) {
+    } catch (e) {
         res.status(400).json({error: "invalid JSON in option header"});
         return;
     }
@@ -26,11 +29,11 @@ module.exports.getOptionsFromReq = function (req, res, def) {
     return options;
 };
 
-module.exports.getDataFromReq = function (req, res,  key, def) {
+module.exports.getDataFromReq = function (req, res, key, def) {
     let dataHeader = req.headers["minerender-" + key] || "{}";
     try {
         dataHeader = JSON.parse(dataHeader);
-    }catch (e) {
+    } catch (e) {
         res.status(400).json({error: "invalid JSON in data header"});
         return;
     }
@@ -70,19 +73,33 @@ module.exports.createFakeElement = function () {
 module.exports.sendRenderToRes = function (render, renderer, target, req, res) {
     res.setHeader('Content-Type', 'image/png');
     res.setHeader("X-Minerender-Options", JSON.stringify(render.options));
+    res.setHeader("Last-Modified", new Date());
+    res.setHeader("Cache-Control","max-age=86400");
+    let key = cacheKey(req);
+    res.setHeader("ETag", key);
+    let file = path.join("cache", key + ".png");
+    let fileStream = fs.createWriteStream(file);
+    pngStream(renderer, target).pipe(fileStream);
     pngStream(renderer, target).pipe(res);
 };
 
-module.exports.isObjectEmpty = function(obj) {
-    for(let key in obj) {
-        if(obj.hasOwnProperty(key))
+module.exports.isObjectEmpty = function (obj) {
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key))
             return false;
     }
     return true;
 };
 
+function cacheKey(req) {
+    let optionHeader = req.headers["minerender-options"] || "{}";
+    let url = req.originalUrl || req.url;
+    return crypto.createHash("md5").update(url + "__" + optionHeader).digest("hex");
+}
 
- function createFakeCanvas(w, h) {
+module.exports.cacheKey = cacheKey;
+
+function createFakeCanvas(w, h) {
     let c = createCanvas(w, h);
     c.addEventListener = function (event, func, bind_) {
     };
@@ -100,7 +117,8 @@ module.exports.isObjectEmpty = function(obj) {
     };
     return c;
 }
-module.exports.createFakeCanvas =createFakeCanvas;
+
+module.exports.createFakeCanvas = createFakeCanvas;
 
 function createFakeImg() {
     let img = new Image();
@@ -120,4 +138,5 @@ function createFakeImg() {
     };
     return img;
 }
-module.exports.createFakeImg =createFakeImg;
+
+module.exports.createFakeImg = createFakeImg;

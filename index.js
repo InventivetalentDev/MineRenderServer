@@ -16,7 +16,8 @@ const path = require("path");
 const {createCanvas, loadImage, Image, Canvas} = require("canvas");
 const gl = require("gl");
 const pngStream = require('three-png-stream');
-const {createFakeCanvas, createFakeImg} = require("./routes/helpers");
+const {createFakeCanvas, createFakeImg, cacheKey} = require("./routes/helpers");
+const crypto = require("crypto");
 // Stuff to trick Minerender into thinking it's in a browser
 global.Image = Image;
 global.THREE = require("three");
@@ -38,7 +39,7 @@ global.window = {
     innerHeight: 1080,
     document: {
         createElement: function (type) {
-            console.log("createElement("+type+")")
+            console.log("createElement(" + type + ")")
             if (type === "canvas") {
                 return createFakeCanvas(64, 64);
             }
@@ -48,7 +49,7 @@ global.window = {
             throw new Error("#createElement only supported for 'canvas' and 'img' (called for " + type + ")");
         },
         createElementNS: function (ns, type) {
-            console.log("createElementNS("+type+")")
+            console.log("createElementNS(" + type + ")")
             if (type === "canvas") {
                 return createFakeCanvas(64, 64);
             }
@@ -84,9 +85,34 @@ function errorCatcher(err, req, res, next) {
     res.json({msg: "Something went wrong trying to render your request!"});
 }
 
+function cache(req, res, next) {
+    let key = cacheKey(req);
+    res.setHeader("ETag", key);
+    let file = path.join( "cache", key + ".png");
+    console.log(file);
+    let birthtime;
+    if (fs.existsSync(file) && (Date.now() - (birthtime=fs.statSync(file)["birthtimeMs"]) < 8.64e+7/*1day*/)) {
+        console.log("cache: true");
+        res.setHeader("X-Cached", true);
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader("Last-Modified", new Date(birthtime));
+        res.setHeader("Cache-Control","max-age=86400");
+        let content = fs.readFileSync(file);
+        res.send(content);
+        return;
+    } else {
+        console.log("cache: false");
+        res.setHeader("X-Cached", false);
+        next();
+        fs.unlinkSync(file);
+    }
+}
 
-app.use("/render/skin", errorCatcher, require("./routes/render/skin")(express, config));
-app.use("/render/model", errorCatcher, require("./routes/render/model")(express, config));
+app.use(errorCatcher);
+app.use(cache);
+
+app.use("/render/skin", require("./routes/render/skin")(express, config));
+app.use("/render/model", require("./routes/render/model")(express, config));
 
 
 server.listen(port, function () {
