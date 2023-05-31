@@ -20,7 +20,7 @@
     "minerender": "git+https://github.com/InventivetalentDev/MineRender.git",
     "node-fetch": "2.3.0",
     "raf": "3.4.1",
-    "three": "0.93.0",
+    "three": "0.153.0",
     "three-png-stream": "1.0.3",
     "xhr2": "0.1.4",
     "xmlhttprequest": "1.8.0"
